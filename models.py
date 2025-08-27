@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, Integer, String, Date, ForeignKey
 from sqlalchemy.orm import relationship
-from db.db import Base
+from db import Base
 
 author_book = Table(
     "author_book",
@@ -49,8 +49,7 @@ class Genre(Base):
 
 
     books = relationship("Book", secondary=book_genre, back_populates="genres")
-    subgenres = relationship("Genre", back_populates="parent", cascade="all, delete-orphan")
-    parent = relationship("Genre", back_populates=subgenres, remote_side=[name])
-
+    subgenres = relationship("Genre", back_populates="parent", cascade="all")
+    parent = relationship("Genre", back_populates="subgenres", remote_side=[name])
 
 
