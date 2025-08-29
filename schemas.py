@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 class AuthorSchema(BaseModel):
     id: int
@@ -10,6 +10,12 @@ class AuthorSchema(BaseModel):
     class Config:
         orm_mode: True
 
+class GenreSchema(BaseModel):
+    name: str
+    parent_genre: Optional[str] = None
+
+    class Config:
+        orm_mode: True
 
 class BookSchema(BaseModel):
     id: int
@@ -19,10 +25,21 @@ class BookSchema(BaseModel):
     class Config:
         orm_mode: True
 
-
-class GenreSchema(BaseModel):
-    name: str
-    parent_genre: Optional[str] = None
+class BookDeepSchema(BaseModel):
+    id: int
+    title: str
+    pub_date: date
+    authors: List[AuthorSchema]
+    genres: List[GenreSchema]
 
     class Config:
         orm_mode: True
+
+class BookCreateSchema(BaseModel):
+    title: str 
+    pub_date: date
+    author_ids: List[int] = []
+    genre_names: List[str] = []
+
+    class Config:
+        orm_mode = True
