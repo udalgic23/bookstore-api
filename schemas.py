@@ -43,3 +43,12 @@ class BookCreateSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class BookUpdateSchema(BaseModel):
+    title: Optional[str] = None
+    pub_date: Optional[date] = None
+    author_ids: Optional[List[int]] = None
+    genre_names: Optional[List[str]] = None
+
+    class Config:
+        orm_mode = True

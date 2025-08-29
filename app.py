@@ -67,3 +67,31 @@ def create_book(book: BookCreateSchema, db : Session = Depends(get_db)):
     db.commit()
     db.refresh(new_book)
     return new_book
+
+@app.put("/books/{book_id}", response_model=BookDeepSchema)
+def update_book(book_id: int, book: BookUpdateSchema, db: Session = Depends(get_db)):
+    db_book = db.query(Book).filter(Book.id == book_id).first()
+    if not db_book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    if book.title is not None:
+        db_book.title = book.title
+
+    if book.pub_date is not None:
+        db_book.pub_date = book.pub_date
+
+    if book.author_ids is not None:
+        authors = db.query(Author).filter(Author.id.in_(book.author_ids)).all()
+        if len(authors) != len(book.author_ids):
+            raise HTTPException(status_code=404, detail="One or more authors not found")
+        db_book.authors = authors
+
+    if book.genre_names is not None:
+        genres = db.query(Genre).filter(Genre.name.in_(book.genre_names)).all()
+        if len(genres) != len(book.genre_names):
+            raise HTTPException(status_code=404, detail="One or more genres not found")
+        db_book.genres = genres
+
+    db.commit()
+    db.refresh(db_book)
+    return db_book
