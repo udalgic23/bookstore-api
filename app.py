@@ -27,7 +27,7 @@ def get_books(db: Session = Depends(get_db)):
 
 
 @app.get("/genres", response_model=List[GenreSchema])
-def get_books(db: Session = Depends(get_db)):
+def get_genres(db: Session = Depends(get_db)):
     return db.query(Genre).all()
 
 
@@ -124,4 +124,30 @@ def add_book_to_genre(genre_name: str, books_to_add: List[int], db: Session = De
     db.commit()
     db.refresh(genre)
     return books
+
+@app.put("/books/{book_id}/authors", response_model=BookDeepSchema)
+def add_authors_to_book(book_id: int, authors_list: List[int], db: Session = Depends(get_db)):
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if book is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    authors = db.query(Author).filter(Author.id.in_(authors_list)).all()
+    if len(authors) != len(authors_list):
+        raise HTTPException(status_code=404, detail="One or more authors not found")
+    
+    book.authors.extend(authors)
+    db.commit()
+    db.refresh(book)
+    return book
+
+@app.delete("/books/{book_id}")
+def delete_book(book_id: int, db: Session = Depends(get_db)):
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if book is None:
+        raise HTTPException(status_code=404, detail="Book does not exist")
+
+    db.delete(book)
+    db.commit()
+    return {"message": f"Book {book_id} has been deleted"}
+
 
