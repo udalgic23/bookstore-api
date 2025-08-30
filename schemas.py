@@ -2,13 +2,6 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional, List
 
-class AuthorSchema(BaseModel):
-    id: int
-    name: str
-    b_day: date
-
-    class Config:
-        orm_mode: True
 
 class GenreSchema(BaseModel):
     name: str
@@ -21,6 +14,23 @@ class BookSchema(BaseModel):
     id: int
     title: str
     pub_date: date
+
+    class Config:
+        orm_mode: True
+
+class AuthorSchema(BaseModel):
+    id: int
+    name: str
+    b_day: date
+    books: List[BookSchema]
+
+    class Config:
+        orm_mode: True
+
+class AuthorCreateSchema(BaseModel):
+    name: str
+    b_day: date
+    books_ids: List[int] = []
 
     class Config:
         orm_mode: True

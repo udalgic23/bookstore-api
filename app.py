@@ -38,6 +38,19 @@ def get_books_of_author(author_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Author not found")
     return author.books
 
+@app.post("/authors", response_model=AuthorSchema)
+def create_author(author: AuthorCreateSchema, db: Session = Depends(get_db)):
+    new_author = Author(name=author.name, b_day=author.b_day)
+    if author.books_ids:
+        books = db.query(Book).filter(Book.id.in_(author.books_ids)).all()
+        if len(books) != len(author.books_ids):
+            raise HTTPException(status_code=404, detail="One or more books not found")
+        new_author.books = books
+    
+    db.add(new_author)
+    db.commit()
+    db.refresh(new_author)
+    return new_author
 
 @app.get("/books/{book_id}", response_model=BookDeepSchema)
 def get_book_information(book_id: int, db: Session = Depends(get_db)):
@@ -95,3 +108,20 @@ def update_book(book_id: int, book: BookUpdateSchema, db: Session = Depends(get_
     db.commit()
     db.refresh(db_book)
     return db_book
+
+@app.put("/genres/{genre_name}", response_model=List[BookSchema])
+def add_book_to_genre(genre_name: str, books_to_add: List[int], db: Session = Depends(get_db)):
+    books = db.query(Book).filter(Book.id.in_(books_to_add)).all()
+    genre = db.query(Genre).filter(Genre.name == genre_name).first()
+    
+    if genre is None:
+        raise HTTPException(status_code=404, detail="Genre not found")
+
+    if len(books) != len(books_to_add):
+        raise HTTPException(status_code=404, detail="One or more books not found")
+    
+    genre.books.extend(books)
+    db.commit()
+    db.refresh(genre)
+    return books
+
