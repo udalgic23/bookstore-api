@@ -45,7 +45,7 @@ class Genre(Base):
     __tablename__ = "genre"
 
     name = Column(String, primary_key=True)
-    parent_genre = Column(String, ForeignKey("genre.name"))
+    parent_genre = Column(String, ForeignKey("genre.name"), index=True)
 
 
     books = relationship("Book", secondary=book_genre, back_populates="genres")

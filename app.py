@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from typing import List
 from db import SessionLocal
 from models import *
@@ -150,4 +152,40 @@ def delete_book(book_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": f"Book {book_id} has been deleted"}
 
+@app.get("/genre/{genre_name}", response_model=List[GenreBookSchema])
+def all_books_of_genre(genre_name: str, db: Session = Depends(get_db)):
+    genre = db.query(Genre).filter(Genre.name == genre_name).first()
+    if genre is None:
+        raise HTTPException(status_code=404, detail="Genre does not exist")
+    
+    base = select(Genre.name, Genre.parent_genre).where(Genre.name == genre.name)
+    genre_cte = base.cte(name="genre_cte", recursive=True)
+
+    genre_alias = Genre.__table__.alias()
+    recursive = (
+        select(genre_alias.c.name, genre_alias.c.parent_genre)
+        .join(genre_cte, genre_alias.c.parent_genre == genre_cte.c.name)
+    )
+
+    genre_cte = genre_cte.union_all(recursive)
+
+    stmt = (
+        select(Book)
+        .join(book_genre, book_genre.c.book_id == Book.id)
+        .join(Genre, Genre.name == book_genre.c.genre_name)
+        .join(genre_cte, genre_cte.c.name == Genre.name)
+        .distinct()
+    )
+
+    books = db.scalars(stmt).all()
+    return books
+
+
+
+@app.api_route("/{path_name:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def catch_all(path_name: str):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": f"Endpoint '/{path_name}' not found"}
+    )
 

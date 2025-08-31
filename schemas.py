@@ -62,3 +62,12 @@ class BookUpdateSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class GenreBookSchema(BaseModel):
+    id: int
+    title: str
+    pub_date: date
+    genres: List[GenreSchema]
+
+    class Config:
+        orm_mode = True
