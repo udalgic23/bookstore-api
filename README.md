@@ -14,7 +14,7 @@ A simple API for managing a bookstore, built with FastAPI.
    ```
    - On **macOS/Linux**:
      ```
-     source venv/bin/activate
+     source myvenv/bin/activate
      ```
 5. Install required packages from requirements.txt using:
      ```
