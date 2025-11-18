@@ -28,3 +28,9 @@ A simple API for managing a bookstore, built with FastAPI.
     ```
     https://127.0.0.1:8000/docs
     ```
+
+
+- Developed a high-performance RESTful API using FastAPI to manage bookstore inventory, enabling efficient handling of CRUD operations and asynchronous request processing.
+- Architected a robust data layer by integrating SQLAlchemy ORM with SQLite, designing relational database models and implementing automated data seeding scripts for rapid development and testing.
+- Ensured data integrity and type safety by utilizing Pydantic schemas for strict request validation and response serialization, while leveraging auto-generated Swagger UI for interactive API documentation.
+    
